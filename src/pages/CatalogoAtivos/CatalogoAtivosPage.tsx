@@ -1,28 +1,16 @@
-import { useEffect, useState } from "react"
-import { ChevronLeft, ChevronRight } from "lucide-react"
+import { Link } from "react-router"
 import { DataTable, type Column } from "@/components/common/DataTable"
+import { ErroBanner } from "@/components/common/ErroBanner"
 import { PageHeader } from "@/components/common/PageHeader"
+import { Paginacao } from "@/components/common/Paginacao"
 import { ResumoCards } from "@/components/common/ResumoCards"
 import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { listarAtivos, mensagemDeErroApi } from "@/services/ativosService"
+import { useListaPaginada } from "@/hooks/use-lista-paginada"
+import { useResumo } from "@/hooks/use-resumo"
+import { listarAtivos } from "@/services/ativosService"
 import { NovoAtivoDialog } from "./NovoAtivoDialog"
-import type { Ativo, Criticidade, Pagina, SituacaoAtivo } from "@/types"
-
-const LIMITE = 20
-
-const situacaoVariant: Record<SituacaoAtivo, "default" | "secondary" | "outline"> = {
-  Inventariado: "default",
-  Rascunho: "secondary",
-  Descontinuado: "outline",
-}
-
-const criticidadeLabel: Record<Criticidade, string> = {
-  Baixa: "Baixa",
-  Media: "Média",
-  Alta: "Alta",
-  Critica: "Crítica",
-}
+import { criticidadeLabel, situacaoVariant } from "@/lib/ativos"
+import type { Ativo } from "@/types"
 
 const pessoaDo = (ativo: Ativo, papel: "Owner" | "Steward") =>
   ativo.papel_ativo.find((p) => p.tipo_papel === papel)?.pessoa.nome
@@ -31,7 +19,11 @@ const columns: Column<Ativo>[] = [
   {
     id: "nome",
     header: "Nome do Ativo",
-    cell: (ativo) => <span className="font-medium">{ativo.nome}</span>,
+    cell: (ativo) => (
+      <Link to={`/catalogo-ativos/${ativo.id}`} className="font-medium hover:underline">
+        {ativo.nome}
+      </Link>
+    ),
   },
   { id: "tipo", header: "Tipo", cell: (ativo) => ativo.tipo_componente },
   { id: "dominio", header: "Domínio", cell: (ativo) => ativo.dominio.nome },
@@ -48,112 +40,58 @@ const columns: Column<Ativo>[] = [
   {
     id: "owner",
     header: "Owner",
-    cell: (ativo) =>
-      pessoaDo(ativo, "Owner") ?? <Badge variant="destructive">Sem Owner</Badge>,
+    cell: (ativo) => pessoaDo(ativo, "Owner") ?? <Badge variant="destructive">Sem Owner</Badge>,
   },
   { id: "steward", header: "Steward", cell: (ativo) => pessoaDo(ativo, "Steward") ?? "—" },
 ]
 
 export default function CatalogoAtivosPage() {
-  const [busca, setBusca] = useState("")
-  const [termo, setTermo] = useState("")
-  const [pagina, setPagina] = useState(1)
-  const [recarregar, setRecarregar] = useState(0)
-  const [resultado, setResultado] = useState<Pagina<Ativo> | null>(null)
-  const [carregando, setCarregando] = useState(true)
-  const [erro, setErro] = useState<string | null>(null)
-
-  // Busca no servidor com debounce, voltando para a primeira página.
-  useEffect(() => {
-    const id = setTimeout(() => {
-      setTermo(busca.trim())
-      setPagina(1)
-    }, 300)
-    return () => clearTimeout(id)
-  }, [busca])
-
-  useEffect(() => {
-    const controller = new AbortController()
-    setCarregando(true)
-    setErro(null)
-    listarAtivos({ pagina, limite: LIMITE, busca: termo || undefined }, controller.signal)
-      .then(setResultado)
-      .catch((e) => {
-        if (!controller.signal.aborted) setErro(mensagemDeErroApi(e, "carregar os ativos"))
-      })
-      .finally(() => {
-        if (!controller.signal.aborted) setCarregando(false)
-      })
-    return () => controller.abort()
-  }, [pagina, termo, recarregar])
-
-  const total = resultado?.total ?? 0
-  const totalPaginas = Math.max(1, Math.ceil(total / LIMITE))
+  const lista = useListaPaginada<Ativo>(listarAtivos, "carregar os ativos")
+  const resumo = useResumo(lista.resultado?.total)
 
   return (
     <>
       <PageHeader
         title="Catálogo de Ativos"
         description="Gerenciamento, classificação e governança de modelos e soluções de IA."
-        actions={<NovoAtivoDialog onCreated={() => setRecarregar((n) => n + 1)} />}
+        actions={<NovoAtivoDialog onCreated={lista.recarregar} />}
       />
 
-      <ResumoCards recarregar={recarregar} />
+      <ResumoCards resumo={resumo} />
 
-      {erro && (
-        <div role="alert" className="flex items-center justify-between gap-3 rounded-lg border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive">
-          <span>{erro}</span>
-          <Button variant="outline" size="sm" onClick={() => setRecarregar((n) => n + 1)}>
-            Tentar novamente
-          </Button>
-        </div>
-      )}
+      {lista.erro && <ErroBanner mensagem={lista.erro} onRetry={lista.recarregar} />}
 
       <DataTable
-        data={resultado?.dados ?? []}
-        total={total}
+        data={lista.resultado?.dados ?? []}
+        total={lista.resultado?.total}
         columns={columns}
         getRowId={(ativo) => ativo.id}
         searchPlaceholder="Pesquisar por nome ou descrição..."
-        searchValue={busca}
-        onSearchChange={setBusca}
+        searchValue={lista.busca}
+        onSearchChange={lista.setBusca}
         emptyTitle={
-          carregando ? "Carregando ativos..." : termo ? "Nenhum ativo encontrado" : "Nenhum ativo cadastrado"
+          lista.carregando
+            ? "Carregando ativos..."
+            : lista.termo
+              ? "Nenhum ativo encontrado"
+              : "Nenhum ativo cadastrado"
         }
         emptyDescription={
-          carregando
+          lista.carregando
             ? undefined
-            : termo
+            : lista.termo
               ? "Tente ajustar os termos da pesquisa."
               : "Cadastre o primeiro ativo para vê-lo listado aqui."
         }
       />
 
-      {total > LIMITE && (
-        <div className="flex items-center justify-end gap-3 text-sm">
-          <span className="text-muted-foreground tabular-nums">
-            Página {pagina} de {totalPaginas}
-          </span>
-          <Button
-            variant="outline"
-            size="icon"
-            aria-label="Página anterior"
-            disabled={pagina <= 1 || carregando}
-            onClick={() => setPagina((p) => p - 1)}
-          >
-            <ChevronLeft />
-          </Button>
-          <Button
-            variant="outline"
-            size="icon"
-            aria-label="Próxima página"
-            disabled={pagina >= totalPaginas || carregando}
-            onClick={() => setPagina((p) => p + 1)}
-          >
-            <ChevronRight />
-          </Button>
-        </div>
-      )}
+      <Paginacao
+        pagina={lista.pagina}
+        limite={lista.limite}
+        total={lista.resultado?.total ?? 0}
+        desabilitado={lista.carregando}
+        onChange={lista.setPagina}
+      />
     </>
   )
 }

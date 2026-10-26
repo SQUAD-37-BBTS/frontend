@@ -73,16 +73,62 @@ export interface Usuario {
   papel_sistema: PapelSistema
 }
 
-export type PapelResponsabilidade =
-  | "Owner"
-  | "Steward"
-  | "Responsável Técnico"
-  | "Consumidor"
+export interface Pessoa extends PessoaResumo {
+  area: string | null
+  papel_sistema: PapelSistema
+  ativo: boolean
+}
 
-export interface Responsavel {
+export type ResultadoDecisao =
+  | "Aprovado"
+  | "Rejeitado"
+  | "Risco_Aceito"
+  | "Adequacao_Solicitada"
+
+export interface Decisao {
   id: string
-  nome: string
-  email: string
-  area: string
-  papel: PapelResponsabilidade
+  tipo_decisao: string
+  justificativa: string
+  resultado_decisao: ResultadoDecisao
+  data: string
+  pessoa: PessoaResumo
+}
+
+/** Papel com id (detalhe do ativo), necessário para remoção. */
+export interface PapelDoAtivo extends PapelAtivo {
+  id: string
+  pessoa_id: string
+}
+
+export interface AtivoDetalhe extends Omit<Ativo, "papel_ativo"> {
+  papel_ativo: PapelDoAtivo[]
+  contextualizacao_avaliacao: { id: string; data: string; updated_at: string } | null
+}
+
+export interface Contextualizacao {
+  respostas: Record<string, unknown>
+  data: string
+}
+
+export interface ModeloFundacional {
+  id: string
+  fornecedor: string
+  modelo: string
+  versao_variante: string | null
+  situacao: "Homologado" | "Em_Avaliacao" | "Restrito" | "Descontinuado"
+  restricoes_uso: string | null
+}
+
+export interface DominioCompleto extends Dominio {
+  owner_id: string
+  pessoa: PessoaResumo
+  _count: { ativo: number }
+}
+
+export interface LogAuditoria {
+  id: string
+  tabela_afetada: string
+  data_alteracao: string
+  motivo: string | null
+  pessoa: PessoaResumo
 }

@@ -12,14 +12,8 @@ import {
 } from "@/components/ui/dialog"
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
+import { SelectField, type Opcao } from "@/components/common/SelectField"
 import { Progress } from "@/components/ui/progress"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
 import {
   adicionarPapel,
@@ -30,11 +24,6 @@ import {
 } from "@/services/ativosService"
 import { cn } from "@/lib/utils"
 import type { Criticidade, Dominio, PessoaResumo } from "@/types"
-
-interface Opcao {
-  value: string
-  label: string
-}
 
 const tiposComponente: Opcao[] = [
   "Painel / Dashboard",
@@ -79,45 +68,6 @@ const vazio: Valores = {
   usa_cloud: "Nao",
   steward_id: "",
   responsavel_tecnico_id: "",
-}
-
-function SelectField({
-  id,
-  label,
-  options,
-  value,
-  onChange,
-  required,
-  placeholder = "Selecione",
-}: {
-  id: string
-  label: string
-  options: Opcao[]
-  value: string
-  onChange: (value: string) => void
-  required?: boolean
-  placeholder?: string
-}) {
-  return (
-    <Field>
-      <FieldLabel htmlFor={id}>
-        {label}
-        {required && <span className="text-destructive">*</span>}
-      </FieldLabel>
-      <Select items={options} value={value || null} onValueChange={(v) => onChange(v ?? "")}>
-        <SelectTrigger id={id} className="w-full">
-          <SelectValue placeholder={placeholder} />
-        </SelectTrigger>
-        <SelectContent alignItemWithTrigger={false}>
-          {options.map((option) => (
-            <SelectItem key={option.value} value={option.value}>
-              {option.label}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-    </Field>
-  )
 }
 
 const etapas = [
