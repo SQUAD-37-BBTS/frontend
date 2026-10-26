@@ -36,20 +36,20 @@ export function AppHeader() {
     .filter((crumb): crumb is { pathname: string; title: string } => !!crumb.title)
 
   return (
-    <header className="sticky top-0 z-10 flex h-14 shrink-0 items-center gap-2 border-b bg-background/80 px-4 backdrop-blur">
-      <SidebarTrigger className="-ml-1" />
-      <Separator orientation="vertical" className="mr-2 data-[orientation=vertical]:h-4" />
+    <header className="sticky top-0 z-10 flex h-14 shrink-0 items-center gap-2 bg-primary px-4 text-primary-foreground shadow-sm">
+      <SidebarTrigger className="-ml-1 hover:bg-white/15 hover:text-primary-foreground" />
+      <Separator orientation="vertical" className="mr-2 bg-white/30 data-[orientation=vertical]:h-4" />
 
       <Breadcrumb>
-        <BreadcrumbList>
+        <BreadcrumbList className="text-primary-foreground/70">
           {crumbs.map((crumb, index) => (
             <Fragment key={crumb.pathname}>
               {index > 0 && <BreadcrumbSeparator />}
               <BreadcrumbItem>
                 {index === crumbs.length - 1 ? (
-                  <BreadcrumbPage>{crumb.title}</BreadcrumbPage>
+                  <BreadcrumbPage className="font-medium text-primary-foreground">{crumb.title}</BreadcrumbPage>
                 ) : (
-                  <BreadcrumbLink render={<Link to={crumb.pathname} />}>
+                  <BreadcrumbLink className="hover:text-primary-foreground" render={<Link to={crumb.pathname} />}>
                     {crumb.title}
                   </BreadcrumbLink>
                 )}
@@ -60,19 +60,19 @@ export function AppHeader() {
       </Breadcrumb>
 
       <div className="ml-auto flex items-center gap-1">
-        <Button variant="ghost" size="icon" aria-label="Notificações">
+        <Button variant="ghost" size="icon" aria-label="Notificações" className="hover:bg-white/15 hover:text-primary-foreground">
           <Bell />
         </Button>
 
         <DropdownMenu>
           <DropdownMenuTrigger
-            render={<Button variant="ghost" className="gap-2 px-2" aria-label="Menu do usuário" />}
+            render={<Button variant="ghost" className="gap-2 px-2 hover:bg-white/15 hover:text-primary-foreground aria-expanded:bg-white/15 aria-expanded:text-primary-foreground" aria-label="Menu do usuário" />}
           >
             <Avatar size="sm">
-              <AvatarFallback>U</AvatarFallback>
+              <AvatarFallback className="bg-white/20 text-primary-foreground">U</AvatarFallback>
             </Avatar>
             <span className="hidden text-sm font-medium sm:inline">Usuário</span>
-            <ChevronsUpDown className="text-muted-foreground" />
+            <ChevronsUpDown className="opacity-70" />
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-48">
             <DropdownMenuGroup>

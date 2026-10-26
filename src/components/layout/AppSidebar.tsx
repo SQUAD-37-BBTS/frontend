@@ -64,14 +64,14 @@ export function AppSidebar() {
 
   return (
     <Sidebar collapsible="icon">
-      <SidebarHeader className="h-14 justify-center border-b">
+      <SidebarHeader className="h-14 justify-center bg-primary text-primary-foreground">
         <NavLink to="/" className="flex items-center gap-3 px-2">
           <img
             src={logoSvg}
             alt="BBTS"
             className="h-6 w-auto group-data-[collapsible=icon]:hidden"
           />
-          <span className="text-lg font-semibold tracking-tight group-data-[collapsible=icon]:hidden">
+          <span className="text-lg font-semibold tracking-tight text-primary-foreground group-data-[collapsible=icon]:hidden">
             Orion
           </span>
         </NavLink>
