@@ -40,6 +40,8 @@ interface DataTableProps<T> {
   onSearchChange: (value: string) => void
   emptyTitle?: string
   emptyDescription?: string
+  /** Total geral quando `data` é apenas uma página. */
+  total?: number
 }
 
 export function DataTable<T>({
@@ -51,6 +53,7 @@ export function DataTable<T>({
   onSearchChange,
   emptyTitle = "Nenhum registro encontrado",
   emptyDescription,
+  total,
 }: DataTableProps<T>) {
   const [hidden, setHidden] = useState<Set<string>>(new Set())
   const visible = columns.filter((col) => !hidden.has(col.id))
@@ -78,7 +81,7 @@ export function DataTable<T>({
 
         <div className="flex items-center justify-between gap-3 sm:justify-end">
           <span className="text-xs text-muted-foreground">
-            Total: <strong className="text-foreground tabular-nums">{data.length}</strong>
+            Total: <strong className="text-foreground tabular-nums">{total ?? data.length}</strong>
           </span>
           <DropdownMenu>
             <DropdownMenuTrigger render={<Button variant="outline" />}>

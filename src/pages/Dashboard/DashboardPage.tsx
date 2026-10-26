@@ -1,7 +1,7 @@
-import { AlertTriangle, BarChart3, CheckCircle2, Layers, ShieldCheck } from "lucide-react"
+import { BarChart3, CheckCircle2 } from "lucide-react"
 import { NovoAtivoDialog } from "@/pages/CatalogoAtivos/NovoAtivoDialog"
 import { PageHeader } from "@/components/common/PageHeader"
-import { StatCard } from "@/components/common/StatCard"
+import { ResumoCards } from "@/components/common/ResumoCards"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty"
 
@@ -14,12 +14,7 @@ export default function DashboardPage() {
         actions={<NovoAtivoDialog />}
       />
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <StatCard label="Ativos Classificados" icon={<CheckCircle2 />} />
-        <StatCard label="Simplificada" icon={<AlertTriangle />} />
-        <StatCard label="Assistida" icon={<ShieldCheck />} />
-        <StatCard label="Orquestrada" icon={<Layers />} />
-      </div>
+      <ResumoCards />
 
       <div className="grid gap-4 lg:grid-cols-3">
         <Card className="lg:col-span-2">
