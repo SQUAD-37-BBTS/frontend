@@ -1,5 +1,6 @@
 import { NavLink, useLocation } from "react-router"
-import { BarChart3, CircleHelp, LayoutDashboard, Users } from "lucide-react"
+import { BarChart3, CircleHelp, FolderTree, LayoutDashboard, ScrollText, Users } from "lucide-react"
+import { useAuth } from "@/contexts/AuthContext"
 import logoSvg from "@/assets/bbts-logo.svg"
 import {
   Sidebar,
@@ -19,6 +20,11 @@ const principal = [
   { path: "/", label: "Dashboard", icon: LayoutDashboard },
   { path: "/catalogo-ativos", label: "Catálogo de Ativos", icon: BarChart3 },
   { path: "/responsaveis", label: "Responsáveis", icon: Users },
+]
+
+const administracao = [
+  { path: "/dominios", label: "Domínios", icon: FolderTree },
+  { path: "/auditoria", label: "Auditoria", icon: ScrollText },
 ]
 
 const suporte = [{ path: "/ajuda", label: "Ajuda", icon: CircleHelp }]
@@ -61,6 +67,7 @@ function NavGroup({
 
 export function AppSidebar() {
   const { pathname } = useLocation()
+  const { usuario } = useAuth()
 
   return (
     <Sidebar collapsible="icon">
@@ -79,6 +86,9 @@ export function AppSidebar() {
 
       <SidebarContent>
         <NavGroup label="Plataforma" items={principal} pathname={pathname} />
+        {usuario?.papel_sistema === "Admin" && (
+          <NavGroup label="Administração" items={administracao} pathname={pathname} />
+        )}
         <NavGroup label="Suporte" items={suporte} pathname={pathname} />
       </SidebarContent>
 
