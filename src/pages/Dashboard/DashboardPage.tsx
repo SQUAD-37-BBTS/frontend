@@ -1,8 +1,7 @@
-import { Link } from "react-router"
-import { AlertTriangle, BarChart3, CheckCircle2, Layers, Plus, ShieldCheck } from "lucide-react"
+import { AlertTriangle, BarChart3, CheckCircle2, Layers, ShieldCheck } from "lucide-react"
+import { NovoAtivoDialog } from "@/pages/CatalogoAtivos/NovoAtivoDialog"
 import { PageHeader } from "@/components/common/PageHeader"
 import { StatCard } from "@/components/common/StatCard"
-import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty"
 
@@ -12,11 +11,7 @@ export default function DashboardPage() {
       <PageHeader
         title="Dashboard"
         description="Visão geral da governança de ativos de IA."
-        actions={
-          <Button render={<Link to="/catalogo-ativos/novo" />}>
-            <Plus /> Novo Ativo
-          </Button>
-        }
+        actions={<NovoAtivoDialog />}
       />
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">

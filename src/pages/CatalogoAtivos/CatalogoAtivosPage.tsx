@@ -1,11 +1,10 @@
 import { useState } from "react"
-import { Link } from "react-router"
-import { AlertTriangle, CheckCircle2, Layers, Plus, ShieldCheck } from "lucide-react"
+import { AlertTriangle, CheckCircle2, Layers, ShieldCheck } from "lucide-react"
 import { DataTable, type Column } from "@/components/common/DataTable"
 import { PageHeader } from "@/components/common/PageHeader"
 import { StatCard } from "@/components/common/StatCard"
 import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
+import { NovoAtivoDialog } from "./NovoAtivoDialog"
 import type { Ativo, StatusAtivo } from "@/types"
 
 const statusVariant: Record<StatusAtivo, "default" | "secondary" | "outline"> = {
@@ -46,11 +45,7 @@ export default function CatalogoAtivosPage() {
       <PageHeader
         title="Catálogo de Ativos"
         description="Gerenciamento, classificação e governança de modelos e soluções de IA."
-        actions={
-          <Button render={<Link to="/catalogo-ativos/novo" />}>
-            <Plus /> Novo Ativo
-          </Button>
-        }
+        actions={<NovoAtivoDialog />}
       />
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
