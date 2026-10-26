@@ -14,6 +14,16 @@ export type PapelResponsabilidade =
   | "Responsável Técnico"
   | "Consumidor"
 
+export type PapelSistema = "Admin" | "Usuario"
+
+export interface Usuario {
+  id: string
+  nome: string
+  email: string
+  area: string | null
+  papel_sistema: PapelSistema
+}
+
 export interface Responsavel {
   id: string
   nome: string

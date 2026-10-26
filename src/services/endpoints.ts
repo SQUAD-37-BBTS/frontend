@@ -1,11 +1,7 @@
 // Configuração central dos endpoints
-// import { api } from "./api"
-
-// export const endpoints = {
-//   users: "/users",
-//   userById: (id: string | number) => `/users/${id}`,
-//   login: "/auth/login",
-// }
-
-// Exemplo de uso:
-// export const getUsers = () => api.get(endpoints.users)
+export const endpoints = {
+  login: "/auth/login",
+  refresh: "/auth/refresh",
+  logout: "/auth/logout",
+  me: "/auth/me",
+}

@@ -21,6 +21,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Separator } from "@/components/ui/separator"
+import { useAuth } from "@/contexts/AuthContext"
 import { SidebarTrigger } from "@/components/ui/sidebar"
 
 export interface RouteHandle {
@@ -28,6 +29,8 @@ export interface RouteHandle {
 }
 
 export function AppHeader() {
+  const { usuario, logout } = useAuth()
+  const nome = usuario?.nome ?? "Usuário"
   const crumbs = useMatches()
     .map((match) => ({
       pathname: match.pathname,
@@ -69,20 +72,20 @@ export function AppHeader() {
             render={<Button variant="ghost" className="gap-2 px-2 hover:bg-white/15 hover:text-primary-foreground aria-expanded:bg-white/15 aria-expanded:text-primary-foreground" aria-label="Menu do usuário" />}
           >
             <Avatar size="sm">
-              <AvatarFallback className="bg-white/20 text-primary-foreground">U</AvatarFallback>
+              <AvatarFallback className="bg-white/20 text-primary-foreground">{nome.charAt(0).toUpperCase()}</AvatarFallback>
             </Avatar>
-            <span className="hidden text-sm font-medium sm:inline">Usuário</span>
+            <span className="hidden text-sm font-medium sm:inline">{nome}</span>
             <ChevronsUpDown className="opacity-70" />
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-48">
             <DropdownMenuGroup>
-              <DropdownMenuLabel>Minha conta</DropdownMenuLabel>
+              <DropdownMenuLabel className="truncate">{usuario?.email ?? "Minha conta"}</DropdownMenuLabel>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuItem>
               <Settings /> Configurações
             </DropdownMenuItem>
-            <DropdownMenuItem>
+            <DropdownMenuItem onClick={() => void logout()}>
               <LogOut /> Sair
             </DropdownMenuItem>
           </DropdownMenuContent>
