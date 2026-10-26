@@ -1,7 +1,9 @@
-import { useEffect, useState } from "react"
-import { Loader2, Save } from "lucide-react"
+import { useEffect, useRef, useState } from "react"
+import { isAxiosError, isCancel } from "axios"
+import { Loader2, Save, Sparkles } from "lucide-react"
 import { ErroBanner } from "@/components/common/ErroBanner"
 import { SelectField } from "@/components/common/SelectField"
+import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { formatarData } from "@/lib/ativos"
@@ -10,6 +12,7 @@ import {
   listarModelos,
   mensagemDeErroApi,
   salvarContextualizacao,
+  sugerirComIa,
 } from "@/services/ativosService"
 import type { AtivoDetalhe, ModeloFundacional } from "@/types"
 
@@ -31,6 +34,11 @@ const PERGUNTAS = [
 
 type Chave = (typeof PERGUNTAS)[number]["chave"]
 type Respostas = Record<string, unknown>
+/** Respostas preenchidas por sugestão de IA: valor sugerido e justificativa. */
+type Sugeridas = Partial<Record<Chave, { valor: string; justificativa: string }>>
+
+// Após poucos segundos de espera, oferece seguir sem a sugestão (entrega parcial, 1.5).
+const ESPERA_ATE_PULAR_MS = 3000
 
 const paraCampo = (v: unknown) => (v === true ? "Sim" : v === false ? "Nao" : "")
 
@@ -57,6 +65,11 @@ export function QuestionarioCard({ ativo, podeEditar, onChange }: Props) {
   const [salvando, setSalvando] = useState(false)
   const [erro, setErro] = useState<string | null>(null)
   const [salvo, setSalvo] = useState(false)
+  const [sugeridas, setSugeridas] = useState<Sugeridas>({})
+  const [sugerindo, setSugerindo] = useState(false)
+  const [demorando, setDemorando] = useState(false)
+  const [avisoIa, setAvisoIa] = useState<string | null>(null)
+  const sugestaoRef = useRef<AbortController | null>(null)
 
   useEffect(() => {
     let ativoNaTela = true
@@ -66,7 +79,18 @@ export function QuestionarioCard({ ativo, podeEditar, onChange }: Props) {
         const respostas = c?.respostas ?? {}
         setOriginal(respostas)
         setData(c?.data ?? null)
-        setCampos(Object.fromEntries(PERGUNTAS.map((p) => [p.chave, paraCampo(respostas[p.chave])])))
+        const campos = Object.fromEntries(PERGUNTAS.map((p) => [p.chave, paraCampo(respostas[p.chave])]))
+        setCampos(campos)
+        // Respostas já gravadas com origem "ia" continuam marcadas enquanto não forem corrigidas.
+        const origens = (respostas.origens ?? {}) as Record<string, string>
+        setSugeridas(
+          Object.fromEntries(
+            PERGUNTAS.filter((p) => origens[p.chave] === "ia" && campos[p.chave]).map((p) => [
+              p.chave,
+              { valor: campos[p.chave], justificativa: "" },
+            ]),
+          ),
+        )
         const m = respostas.modelo_fundacional
         if (m && typeof m === "object" && "id" in m) setModeloId(String((m as { id: string }).id))
       })
@@ -76,6 +100,7 @@ export function QuestionarioCard({ ativo, podeEditar, onChange }: Props) {
     listarModelos().then((m) => ativoNaTela && setModelos(m)).catch(() => undefined)
     return () => {
       ativoNaTela = false
+      sugestaoRef.current?.abort()
     }
   }, [ativo.id])
 
@@ -83,6 +108,60 @@ export function QuestionarioCard({ ativo, podeEditar, onChange }: Props) {
   const modelo = modelos.find((m) => m.id === modeloId)
   // Resposta antiga em texto livre (ex.: dados de exemplo) conta como preenchida.
   const modeloLegado = typeof original.modelo_fundacional === "string" ? original.modelo_fundacional : null
+
+  // Corrigir uma sugestão (valor diferente do sugerido) passa a contar como resposta do usuário.
+  const alterarCampo = (chave: Chave, valor: string) => {
+    setCampos((c) => ({ ...c, [chave]: valor }))
+    setSugeridas((s) => (s[chave]?.valor === valor ? s : { ...s, [chave]: undefined }))
+  }
+
+  const pularSugestao = () => {
+    sugestaoRef.current?.abort()
+    setAvisoIa("Sugestão ignorada. Preencha o questionário manualmente.")
+  }
+
+  const sugerir = async () => {
+    const controller = new AbortController()
+    sugestaoRef.current = controller
+    setAvisoIa(null)
+    setErro(null)
+    setSugerindo(true)
+    setDemorando(false)
+    const timer = setTimeout(() => setDemorando(true), ESPERA_ATE_PULAR_MS)
+    try {
+      const r = await sugerirComIa(ativo.id, controller.signal)
+      // Só preenche o que ainda não foi respondido: nunca sobrescreve o usuário.
+      const novas: Sugeridas = {}
+      const preenchidos: Partial<Record<Chave, string>> = {}
+      for (const { chave } of PERGUNTAS) {
+        const sugestao = r.sugestoes[chave]
+        if (!sugestao || campos[chave]) continue
+        const valor = sugestao.valor ? "Sim" : "Nao"
+        preenchidos[chave] = valor
+        novas[chave] = { valor, justificativa: sugestao.justificativa }
+      }
+      setCampos((c) => ({ ...c, ...preenchidos }))
+      setSugeridas((s) => ({ ...s, ...novas }))
+      setAvisoIa(
+        Object.keys(novas).length
+          ? "Sugestões da IA aplicadas. Revise, confirme ou corrija cada resposta antes de salvar."
+          : "A IA não trouxe sugestões para as perguntas ainda em branco.",
+      )
+    } catch (e) {
+      if (isCancel(e)) return
+      // 422: descrição curta (a mensagem vem da API). Demais falhas: IA fora do ar ou lenta.
+      const insuficiente = isAxiosError(e) && e.response?.status === 422
+      setAvisoIa(
+        insuficiente
+          ? mensagemDeErroApi(e)
+          : "Sugestão automática indisponível no momento. Preencha o questionário manualmente.",
+      )
+    } finally {
+      clearTimeout(timer)
+      setSugerindo(false)
+      setDemorando(false)
+    }
+  }
 
   const salvar = async () => {
     setErro(null)
@@ -100,7 +179,7 @@ export function QuestionarioCard({ ativo, podeEditar, onChange }: Props) {
       const v = campos[chave]
       if (v) {
         respostas[chave] = v === "Sim"
-        origens[chave] = "usuario"
+        origens[chave] = sugeridas[chave]?.valor === v ? "ia" : "usuario"
       } else {
         delete respostas[chave]
         delete origens[chave]
@@ -154,12 +233,23 @@ export function QuestionarioCard({ ativo, podeEditar, onChange }: Props) {
                   label={p.texto}
                   options={simNao}
                   value={campos[p.chave] ?? ""}
-                  onChange={(v) => setCampos((c) => ({ ...c, [p.chave]: v }))}
+                  onChange={(v) => alterarCampo(p.chave, v)}
                   disabled={!podeEditar}
                   placeholder="Não respondido"
                 />
               ))}
             </div>
+
+            {PERGUNTAS.some((p) => campos[p.chave] && sugeridas[p.chave]) && (
+              <ul className="grid gap-1 rounded-lg border bg-muted/40 p-3 text-xs text-muted-foreground">
+                {PERGUNTAS.filter((p) => campos[p.chave] && sugeridas[p.chave]).map((p) => (
+                  <li key={p.chave}>
+                    <Badge variant="outline">Sugerido pela IA</Badge> <strong>{p.texto}</strong>{" "}
+                    {sugeridas[p.chave]?.justificativa}
+                  </li>
+                ))}
+              </ul>
+            )}
 
             {usaModelo && (
               <div className="grid gap-2">
@@ -185,14 +275,24 @@ export function QuestionarioCard({ ativo, podeEditar, onChange }: Props) {
               </div>
             )}
 
+            {avisoIa && <p className="text-sm text-muted-foreground">{avisoIa}</p>}
             {erro && <ErroBanner mensagem={erro} />}
             {salvo && <p className="text-sm text-muted-foreground">Questionário salvo.</p>}
 
             {podeEditar ? (
-              <div>
-                <Button onClick={salvar} disabled={salvando}>
+              <div className="flex flex-wrap items-center gap-2">
+                <Button onClick={salvar} disabled={salvando || sugerindo}>
                   {salvando ? <Loader2 className="animate-spin" /> : <Save />} Salvar respostas
                 </Button>
+                <Button variant="outline" onClick={sugerir} disabled={sugerindo || salvando}>
+                  {sugerindo ? <Loader2 className="animate-spin" /> : <Sparkles />}
+                  {sugerindo ? "Analisando a descrição..." : "Sugerir com IA"}
+                </Button>
+                {sugerindo && demorando && (
+                  <Button variant="ghost" onClick={pularSugestao}>
+                    Pular sugestão e preencher manualmente
+                  </Button>
+                )}
               </div>
             ) : (
               <p className="text-xs text-muted-foreground">

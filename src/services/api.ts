@@ -3,10 +3,12 @@ import { authStorage, SESSAO_EXPIRADA, type Tokens } from "./authStorage"
 import { endpoints } from "./endpoints"
 
 const baseURL = import.meta.env.VITE_API_URL
+// Em redes lentas até o banco, o backend pode precisar de mais que 10 s.
+const timeout = Number(import.meta.env.VITE_API_TIMEOUT_MS ?? 10000)
 
 export const api = axios.create({
   baseURL,
-  timeout: 10000,
+  timeout,
   headers: { "Content-Type": "application/json" },
 })
 
@@ -23,7 +25,7 @@ function renovarAccessToken() {
     const { data } = await axios.post<Tokens>(
       endpoints.refresh,
       { refresh_token },
-      { baseURL, timeout: 10000 },
+      { baseURL, timeout },
     )
     authStorage.salvar(data)
     return data.access_token

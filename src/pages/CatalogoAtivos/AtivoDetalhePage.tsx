@@ -12,6 +12,7 @@ import { buscarAtivo, mensagemDeErroApi } from "@/services/ativosService"
 import { DecisoesCard } from "./detalhe/DecisoesCard"
 import { PapeisCard } from "./detalhe/PapeisCard"
 import { QuestionarioCard } from "./detalhe/QuestionarioCard"
+import { RecomendacaoCard } from "./detalhe/RecomendacaoCard"
 import type { AtivoDetalhe } from "@/types"
 
 function Informacao({ rotulo, valor }: { rotulo: string; valor?: string | null }) {
@@ -28,6 +29,8 @@ export default function AtivoDetalhePage() {
   const { usuario } = useAuth()
   const [ativo, setAtivo] = useState<AtivoDetalhe | null>(null)
   const [erro, setErro] = useState<string | null>(null)
+  // Incrementado quando a recomendação é respondida, para recarregar o histórico de decisões.
+  const [versaoDecisoes, setVersaoDecisoes] = useState(0)
 
   const carregar = useCallback(
     (signal?: AbortSignal) =>
@@ -73,6 +76,10 @@ export default function AtivoDetalhePage() {
   const ehOwner = admin || meusPapeis.includes("Owner")
   const podeQuestionario = ehOwner || meusPapeis.includes("Responsavel_Tecnico")
   const recarregar = () => void carregar()
+  const aoResponderRecomendacao = () => {
+    setVersaoDecisoes((v) => v + 1)
+    recarregar()
+  }
 
   return (
     <>
@@ -103,12 +110,19 @@ export default function AtivoDetalhePage() {
         </CardContent>
       </Card>
 
+      <RecomendacaoCard
+        ativo={ativo}
+        podeDecidir={ehOwner}
+        onResposta={aoResponderRecomendacao}
+        versao={`${ativo.papel_ativo.map((p) => p.id).join(",")}|${ativo.contextualizacao_avaliacao?.updated_at ?? ""}`}
+      />
+
       <div className="grid gap-4 lg:grid-cols-2">
         <PapeisCard ativo={ativo} podeEditar={ehOwner} onChange={recarregar} />
         <QuestionarioCard ativo={ativo} podeEditar={podeQuestionario} onChange={recarregar} />
       </div>
 
-      <DecisoesCard ativo={ativo} podeDecidir={ehOwner} onChange={recarregar} />
+      <DecisoesCard key={versaoDecisoes} ativo={ativo} podeDecidir={ehOwner} onChange={recarregar} />
     </>
   )
 }

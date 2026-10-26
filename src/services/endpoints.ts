@@ -10,6 +10,8 @@ export const endpoints = {
   papelDoAtivo: (id: string, papelId: string) => `/ativos/${id}/papeis/${papelId}`,
   contextualizacao: (id: string) => `/ativos/${id}/contextualizacao`,
   decisoes: (id: string) => `/ativos/${id}/decisoes`,
+  sugestaoIa: (id: string) => `/ativos/${id}/sugestao-ia`,
+  recomendacao: (id: string) => `/ativos/${id}/recomendacao`,
   modelos: "/catalogo/modelos",
   auditoria: "/auditoria",
   dominios: "/dominios",

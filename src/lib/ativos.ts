@@ -40,8 +40,16 @@ export const tiposDecisao = [
   { value: "Aceite_Risco", label: "Aceite de risco" },
 ]
 
+// Gravados ao responder uma recomendação de governança; não são escolhidos à mão.
+const tiposRecomendacao: Record<string, string> = {
+  Recomendacao_Aceita: "Recomendação aceita",
+  Recomendacao_Rejeitada: "Recomendação rejeitada",
+}
+
 export const rotuloTipoDecisao = (valor: string) =>
-  tiposDecisao.find((t) => t.value === valor)?.label ?? valor.replaceAll("_", " ")
+  tiposDecisao.find((t) => t.value === valor)?.label ??
+  tiposRecomendacao[valor] ??
+  valor.replaceAll("_", " ")
 
 export const formatarData = (iso: string) =>
   new Date(iso).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" })

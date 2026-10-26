@@ -94,6 +94,28 @@ export interface Decisao {
   pessoa: PessoaResumo
 }
 
+export interface SugestaoIa {
+  valor: boolean
+  justificativa: string
+}
+
+export interface RespostaSugestaoIa {
+  origem: "ia"
+  modelo: string
+  sugestoes: Record<string, SugestaoIa>
+}
+
+export interface Recomendacao {
+  codigo: string
+  texto: string
+}
+
+export interface RecomendacaoGovernanca {
+  recomendacoes: Recomendacao[]
+  texto: string | null
+  ultima_resposta: Decisao | null
+}
+
 /** Papel com id (detalhe do ativo), necessário para remoção. */
 export interface PapelDoAtivo extends PapelAtivo {
   id: string

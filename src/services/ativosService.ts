@@ -11,6 +11,8 @@ import type {
   ModeloFundacional,
   Pagina,
   PessoaResumo,
+  RecomendacaoGovernanca,
+  RespostaSugestaoIa,
   ResultadoDecisao,
   ResumoDashboard,
   SituacaoAtivo,
@@ -92,6 +94,16 @@ export const listarDecisoes = (id: string) =>
 export const registrarDecisao = (id: string, decisao: NovaDecisao) =>
   api.post<Decisao>(endpoints.decisoes(id), decisao).then((r) => r.data)
 
+/** A IA só sugere: nada é gravado até o usuário salvar o questionário. */
+export const sugerirComIa = (id: string, signal?: AbortSignal) =>
+  api.post<RespostaSugestaoIa>(endpoints.sugestaoIa(id), undefined, { signal }).then((r) => r.data)
+
+export const buscarRecomendacao = (id: string) =>
+  api.get<RecomendacaoGovernanca>(endpoints.recomendacao(id)).then((r) => r.data)
+
+export const responderRecomendacao = (id: string, acao: "Aceitar" | "Rejeitar", justificativa: string) =>
+  api.post<Decisao>(endpoints.recomendacao(id), { acao, justificativa }).then((r) => r.data)
+
 export const listarModelos = () =>
   api
     .get<Pagina<ModeloFundacional>>(endpoints.modelos, { params: { limite: 100 } })
@@ -104,7 +116,7 @@ export function mensagemDeErroApi(erro: unknown, acao = "concluir a operação")
   }
   // 403 e 409 trazem regras de negócio em português (ex.: "Requer o papel Owner").
   const msg = (erro.response.data as { message?: unknown } | undefined)?.message
-  if ((erro.response.status === 403 || erro.response.status === 409) && typeof msg === "string") {
+  if ([403, 409, 422].includes(erro.response.status) && typeof msg === "string") {
     return msg
   }
   switch (erro.response.status) {
