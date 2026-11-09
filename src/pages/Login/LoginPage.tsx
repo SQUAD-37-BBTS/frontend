@@ -2,9 +2,11 @@ import { useState, type FormEvent } from "react"
 import { isAxiosError } from "axios"
 import { Navigate, useLocation } from "react-router"
 import { Eye, EyeOff, Loader2, LogIn } from "lucide-react"
-import logoSvg from "@/assets/bbts-logo.svg"
+
+import logoSvg from "@/assets/bbts-logo-v2.svg"
+import bgLogin from "@/assets/bgLogin.jpg"
+
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import { useAuth } from "@/contexts/AuthContext"
@@ -56,21 +58,25 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-svh items-center justify-center bg-muted/40 p-4">
-      <Card className="w-full max-w-sm overflow-hidden pt-0">
-        <div className="flex h-20 items-center justify-center gap-3 bg-primary text-primary-foreground">
-          <img src={logoSvg} alt="BBTS" className="h-7 w-auto" />
-          <span className="text-xl font-semibold tracking-tight">Orion</span>
-        </div>
-        <CardHeader>
-          <CardTitle>Entrar</CardTitle>
-          <CardDescription>Acesse a plataforma de governança de ativos.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="grid gap-5">
-            <FieldGroup>
-              <Field>
-                <FieldLabel htmlFor="email">E-mail</FieldLabel>
+    <div className="min-h-screen w-full grid grid-cols-1 lg:grid-cols-2 bg-white">
+
+      <div className="flex flex-col justify-center items-center px-6 py-10 sm:py-12 lg:px-16 w-full max-w-sm sm:max-w-md lg:max-w-xl mx-auto">
+        <div className="w-full">
+          <div className="mb-8 flex flex-col items-center sm:items-start text-center sm:text-left">
+            <img
+              src={logoSvg}
+              alt="BBTS Orion"
+              className="w-[90px] sm:w-[120px] h-auto object-contain mb-5 sm:mb-8"
+            />
+            <h2 className="text-2xl sm:text-3xl lg:text-5xl text-primary font-bold tracking-tight">
+              Acesse sua Conta Orion
+            </h2>
+          </div>
+
+          <form onSubmit={handleSubmit} className="space-y-5 w-full">
+            <FieldGroup className="space-y-4">
+              <Field className="flex flex-col gap-1.5">
+                <FieldLabel htmlFor="email">E-mail corporativo</FieldLabel>
                 <Input
                   id="email"
                   name="email"
@@ -83,7 +89,8 @@ export default function LoginPage() {
                   onChange={(e) => setEmail(e.target.value)}
                 />
               </Field>
-              <Field>
+
+              <Field className="flex flex-col gap-1.5 pb-2">
                 <FieldLabel htmlFor="senha">Senha</FieldLabel>
                 <div className="relative">
                   <Input
@@ -91,6 +98,7 @@ export default function LoginPage() {
                     name="senha"
                     type={mostrarSenha ? "text" : "password"}
                     autoComplete="current-password"
+                    placeholder="Digite sua senha"
                     required
                     className="pr-10"
                     value={senha}
@@ -100,29 +108,45 @@ export default function LoginPage() {
                     type="button"
                     variant="ghost"
                     size="icon"
-                    className="absolute inset-y-0 right-0"
+                    className="absolute inset-y-0 right-0 hover:bg-transparent"
                     aria-label={mostrarSenha ? "Ocultar senha" : "Mostrar senha"}
                     onClick={() => setMostrarSenha((v) => !v)}
                   >
-                    {mostrarSenha ? <EyeOff /> : <Eye />}
+                    {mostrarSenha ? (
+                      <EyeOff className="h-5 w-5 text-muted-foreground" />
+                    ) : (
+                      <Eye className="h-5 w-5 text-muted-foreground" />
+                    )}
                   </Button>
                 </div>
               </Field>
             </FieldGroup>
 
             {erro && (
-              <p role="alert" className="text-sm text-destructive">
+              <p role="alert" className="text-sm text-destructive font-semibold">
                 {erro}
               </p>
             )}
 
-            <Button type="submit" disabled={enviando || !email || !senha}>
-              {enviando ? <Loader2 className="animate-spin" /> : <LogIn />}
-              {enviando ? "Entrando..." : "Entrar"}
+            <Button
+              type="submit"
+              disabled={enviando || !email || !senha}
+              className="w-full h-auto py-3.5 text-sm sm:text-base font-bold text-[#3D5AFF] bg-[#FDF429] uppercase hover:bg-[#e6dd25] flex items-center justify-center gap-2 transition-colors"
+            >
+              {enviando ? <Loader2 className="animate-spin h-5 w-5" /> : <LogIn className="h-5 w-5" />}
+              {enviando ? "Entrando..." : "Acessar a plataforma"}
             </Button>
           </form>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
+
+      <div
+        className="hidden lg:block w-full h-full bg-cover bg-no-repeat"
+        style={{
+          backgroundImage: `url(${bgLogin})`,
+          backgroundPosition: "80% center",
+        }}
+      />
     </div>
   )
 }
