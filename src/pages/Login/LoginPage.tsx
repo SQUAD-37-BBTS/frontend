@@ -1,7 +1,7 @@
 import { useState, type FormEvent } from "react"
 import { isAxiosError } from "axios"
 import { Navigate, useLocation } from "react-router"
-import { Eye, EyeOff, Loader2, LogIn } from "lucide-react"
+import { Eye, EyeOff, Loader2 } from "lucide-react"
 
 import logoSvg from "@/assets/bbts-logo-v2.svg"
 import bgLogin from "@/assets/bgLogin.jpg"
@@ -66,7 +66,7 @@ export default function LoginPage() {
             <img
               src={logoSvg}
               alt="BBTS Orion"
-              className="w-[90px] sm:w-[120px] h-auto object-contain mb-5 sm:mb-8"
+              className="w-[90px] sm:w-[140px] h-auto object-contain mb-5 sm:mb-8"
             />
             <h2 className="text-2xl sm:text-3xl lg:text-5xl text-primary font-bold tracking-tight">
               Acesse sua Conta Orion
@@ -133,7 +133,7 @@ export default function LoginPage() {
               disabled={enviando || !email || !senha}
               className="w-full h-auto py-3.5 text-sm sm:text-base font-bold text-[#3D5AFF] bg-[#FDF429] uppercase hover:bg-[#e6dd25] flex items-center justify-center gap-2 transition-colors"
             >
-              {enviando ? <Loader2 className="animate-spin h-5 w-5" /> : <LogIn className="h-5 w-5" />}
+              {enviando && <Loader2 className="animate-spin h-5 w-5" />}
               {enviando ? "Entrando..." : "Acessar a plataforma"}
             </Button>
           </form>
