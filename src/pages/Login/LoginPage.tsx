@@ -1,65 +1,77 @@
-import { useState, type FormEvent } from "react"
-import { isAxiosError } from "axios"
-import { Navigate, useLocation } from "react-router"
-import { Eye, EyeOff, Loader2 } from "lucide-react"
+import { useState, type FormEvent } from "react";
+import { isAxiosError } from "axios";
+import { Navigate, useLocation } from "react-router";
+import { Eye, EyeOff, Loader2 } from "lucide-react";
 
-import logoSvg from "@/assets/bbts-logo-v2.svg"
-import bgLogin from "@/assets/bgLogin.jpg"
+import logoSvg from "@/assets/bbts-logo-v2.svg";
+import logoLoading from "@/assets/icon-bb.svg"
+import bgLogin from "@/assets/bgLogin.jpg";
 
-import { Button } from "@/components/ui/button"
-import { Field, FieldGroup, FieldLabel } from "@/components/ui/field"
-import { Input } from "@/components/ui/input"
-import { useAuth } from "@/contexts/AuthContext"
+import { Button } from "@/components/ui/button";
+import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
+import { Input } from "@/components/ui/input";
+import { useAuth } from "@/contexts/AuthContext";
 
 function mensagemDeErro(erro: unknown) {
   if (!isAxiosError(erro) || !erro.response) {
-    return "Não foi possível conectar ao servidor. Tente novamente."
+    return "Não foi possível conectar ao servidor. Tente novamente.";
   }
   switch (erro.response.status) {
     case 401:
-      return "E-mail ou senha incorretos."
+      return "E-mail ou senha incorretos.";
     case 429:
-      return "Muitas tentativas de acesso. Aguarde alguns minutos e tente novamente."
+      return "Muitas tentativas de acesso. Aguarde alguns minutos e tente novamente.";
     case 400:
-      return "Informe um e-mail válido e a senha."
+      return "Informe um e-mail válido e a senha.";
     case 503:
     case 504:
-      return "Serviço temporariamente indisponível. Tente novamente em instantes."
+      return "Serviço temporariamente indisponível. Tente novamente em instantes.";
     default:
-      return "Não foi possível entrar. Tente novamente."
+      return "Não foi possível entrar. Tente novamente.";
   }
 }
 
 export default function LoginPage() {
-  const { status, login } = useAuth()
-  const location = useLocation()
-  const destino = (location.state as { from?: { pathname: string } } | null)?.from?.pathname ?? "/"
+  const { status, login } = useAuth();
+  const location = useLocation();
+  const destino =
+    (location.state as { from?: { pathname: string } } | null)?.from
+      ?.pathname ?? "/";
 
-  const [email, setEmail] = useState("")
-  const [senha, setSenha] = useState("")
-  const [mostrarSenha, setMostrarSenha] = useState(false)
-  const [enviando, setEnviando] = useState(false)
-  const [erro, setErro] = useState<string | null>(null)
+  const [email, setEmail] = useState("");
+  const [senha, setSenha] = useState("");
+  const [mostrarSenha, setMostrarSenha] = useState(false);
+  const [enviando, setEnviando] = useState(false);
+  const [erro, setErro] = useState<string | null>(null);
 
-  if (status === "autenticado") return <Navigate to={destino} replace />
+  if (status === "autenticado") return <Navigate to={destino} replace />;
+
+  if (enviando) {
+    return (
+      <div className="flex min-h-svh flex-col items-center justify-center gap-4 bg-white">
+        <img src={logoLoading} alt="BBTS Orion" className="h-[72px] w-auto" />
+        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+          <Loader2 className="size-8 animate-spin text-primary" />
+        </div>
+      </div>
+    );
+  }
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault()
-    setErro(null)
-    setEnviando(true)
+    event.preventDefault();
+    setErro(null);
+    setEnviando(true);
     try {
-      await login(email, senha)
+      await login(email, senha);
     } catch (e) {
-      setErro(mensagemDeErro(e))
-      setSenha("")
-    } finally {
-      setEnviando(false)
-    }
-  }
+      setErro(mensagemDeErro(e));
+      setSenha("");
+      setEnviando(false);
+    } 
+  };
 
   return (
     <div className="min-h-screen w-full grid grid-cols-1 lg:grid-cols-2 bg-white">
-
       <div className="flex flex-col justify-center items-center px-6 py-10 sm:py-12 lg:px-16 w-full max-w-sm sm:max-w-md lg:max-w-xl mx-auto">
         <div className="w-full">
           <div className="mb-8 flex flex-col items-center sm:items-start text-center sm:text-left">
@@ -109,7 +121,9 @@ export default function LoginPage() {
                     variant="ghost"
                     size="icon"
                     className="absolute inset-y-0 right-0 hover:bg-transparent"
-                    aria-label={mostrarSenha ? "Ocultar senha" : "Mostrar senha"}
+                    aria-label={
+                      mostrarSenha ? "Ocultar senha" : "Mostrar senha"
+                    }
                     onClick={() => setMostrarSenha((v) => !v)}
                   >
                     {mostrarSenha ? (
@@ -123,7 +137,10 @@ export default function LoginPage() {
             </FieldGroup>
 
             {erro && (
-              <p role="alert" className="text-sm text-destructive font-semibold">
+              <p
+                role="alert"
+                className="text-sm text-destructive font-semibold"
+              >
                 {erro}
               </p>
             )}
@@ -148,5 +165,5 @@ export default function LoginPage() {
         }}
       />
     </div>
-  )
+  );
 }
