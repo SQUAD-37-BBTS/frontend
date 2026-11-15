@@ -5,6 +5,8 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
+  --color-tertiary-pressed: var(--tertiary-pressed);
+  --color-tertiary-foreground: var(--tertiary-foreground);
   --color-container-neutral-raised: var(--container-neutral-raised);
   --color-input-border: var(--input-border);
   --color-input-border-focus: var(--input-border-focus);
@@ -51,6 +53,8 @@
 }
 
 :root {
+  --tertiary-pressed: #DDE9FF;
+  --tertiary-foreground: #3640F5;
   --input-border: #D4D4D8;    
   --input-border-focus: #3640F5;
   --background: oklch(0.985 0.002 270);
@@ -82,8 +86,8 @@
   --sidebar-foreground: oklch(0.145 0 0);
   --sidebar-primary: oklch(0.56 0.24 272);
   --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.96 0.02 272);
-  --sidebar-accent-foreground: oklch(0.45 0.22 272);
+  --sidebar-accent: var(--tertiary-pressed);
+  --sidebar-accent-foreground: var(--tertiary-foreground);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
 }

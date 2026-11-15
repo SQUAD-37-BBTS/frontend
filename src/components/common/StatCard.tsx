@@ -10,11 +10,11 @@ interface StatCardProps {
 export function StatCard({ label, value, icon }: StatCardProps) {
   return (
     <Card>
-      <CardHeader className="flex-row items-center justify-between">
-        <CardDescription>{label}</CardDescription>
+      <CardHeader className="flex flex-col items-start gap-3">
         <span className="flex size-8 items-center justify-center rounded-lg bg-primary/10 text-primary [&_svg]:size-4">
           {icon}
         </span>
+        <CardDescription>{label}</CardDescription>
       </CardHeader>
       <CardContent>
         <p className="text-3xl font-semibold tracking-tight tabular-nums">

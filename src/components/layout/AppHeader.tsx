@@ -1,6 +1,6 @@
 import { Fragment } from "react";
 import { Link, useMatches } from "react-router";
-import { Bell, ChevronsUpDown, LogOut, Settings } from "lucide-react";
+import { Bell, ChevronDown, LogOut, Settings } from "lucide-react";
 import logoSvg from "@/assets/bbts-logo.svg";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
@@ -40,9 +40,12 @@ export function AppHeader() {
       (crumb): crumb is { pathname: string; title: string } => !!crumb.title,
     );
 
+  const menuItemClass =
+    "cursor-pointer py-2 text-base hover:bg-tertiary-pressed hover:text-tertiary-foreground focus:bg-tertiary-pressed focus:text-tertiary-foreground hover:[&_svg]:text-tertiary-foreground focus:[&_svg]:text-tertiary-foreground";
+
   return (
     <header className="sticky top-0 z-30 flex h-14 w-full shrink-0 items-center gap-3 bg-primary px-4 text-primary-foreground shadow-sm">
-      <SidebarTrigger className="-ml-1 hover:bg-white/15 hover:text-primary-foreground" />
+      <SidebarTrigger className="-ml-1 size-10 hover:bg-white/15 hover:text-primary-foreground" />
 
       <Link to="/" className="flex items-center gap-2.5">
         <img src={logoSvg} alt="BBTS" className="h-6 w-auto" />
@@ -107,19 +110,27 @@ export function AppHeader() {
               </AvatarFallback>
             </Avatar>
             <span className="hidden text-sm font-medium sm:inline">{nome}</span>
-            <ChevronsUpDown className="opacity-70" />
+            <ChevronDown className="opacity-70" />
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-48">
+          <DropdownMenuContent align="end" className="w-64">
             <DropdownMenuGroup>
-              <DropdownMenuLabel className="truncate">
-                {usuario?.email ?? "Minha conta"}
+              <DropdownMenuLabel className="flex flex-col gap-0.5 px-2.5 py-2 font-normal">
+                <span className="truncate text-lg font-medium text-foreground">
+                  {nome}
+                </span>
+                <span className="truncate text-base text-muted-foreground">
+                  {usuario?.email ?? "Minha conta"}
+                </span>
               </DropdownMenuLabel>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
+            <DropdownMenuItem className={menuItemClass}>
               <Settings /> Configurações
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => void logout()}>
+            <DropdownMenuItem
+              className={menuItemClass}
+              onClick={() => void logout()}
+            >
               <LogOut /> Sair
             </DropdownMenuItem>
           </DropdownMenuContent>

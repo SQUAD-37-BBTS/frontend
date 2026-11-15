@@ -1,8 +1,8 @@
 import type { Criticidade, ResultadoDecisao, SituacaoAtivo, TipoPapel } from "@/types"
 
-export const situacaoVariant: Record<SituacaoAtivo, "default" | "secondary" | "outline"> = {
-  Inventariado: "default",
-  Rascunho: "secondary",
+export const situacaoVariant: Record<SituacaoAtivo, "info" | "neutral" | "outline"> = {
+  Inventariado: "info",
+  Rascunho: "neutral",
   Descontinuado: "outline",
 }
 
