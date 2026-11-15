@@ -5,16 +5,18 @@ import { AppSidebar } from "./AppSidebar"
 
 export function AppLayout() {
   return (
-    <SidebarProvider>
-      <AppSidebar />
-      <SidebarInset>
-        <AppHeader />
-        <main className="flex-1 p-6 lg:p-8">
-          <div className="mx-auto w-full max-w-7xl space-y-6">
-            <Outlet />
-          </div>
-        </main>
-      </SidebarInset>
+    <SidebarProvider className="flex-col">
+      <AppHeader />
+      <div className="flex flex-1">
+        <AppSidebar />
+        <SidebarInset className="min-w-0">
+          <main className="min-w-0 flex-1 p-3 sm:p-4 lg:p-6">
+            <div className="w-full space-y-6">
+              <Outlet />
+            </div>
+          </main>
+        </SidebarInset>
+      </div>
     </SidebarProvider>
   )
 }

@@ -1,7 +1,6 @@
 import { NavLink, useLocation } from "react-router"
 import { BarChart3, CircleHelp, FolderTree, LayoutDashboard, ScrollText, Users } from "lucide-react"
 import { useAuth } from "@/contexts/AuthContext"
-import logoSvg from "@/assets/bbts-logo.svg"
 import {
   Sidebar,
   SidebarContent,
@@ -9,7 +8,6 @@ import {
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
-  SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
@@ -70,21 +68,11 @@ export function AppSidebar() {
   const { usuario } = useAuth()
 
   return (
-    <Sidebar collapsible="icon">
-      <SidebarHeader className="h-14 justify-center bg-primary text-primary-foreground">
-        <NavLink to="/" className="flex items-center gap-3 px-2">
-          <img
-            src={logoSvg}
-            alt="BBTS"
-            className="h-6 w-auto group-data-[collapsible=icon]:hidden"
-          />
-          <span className="text-lg font-semibold tracking-tight text-primary-foreground group-data-[collapsible=icon]:hidden">
-            Orion
-          </span>
-        </NavLink>
-      </SidebarHeader>
-
-      <SidebarContent>
+    <Sidebar
+      collapsible="icon"
+      className="top-14 h-[calc(100svh-3.5rem)]!"
+    >
+      <SidebarContent className="pt-2">
         <NavGroup label="Plataforma" items={principal} pathname={pathname} />
         {usuario?.papel_sistema === "Admin" && (
           <NavGroup label="Administração" items={administracao} pathname={pathname} />

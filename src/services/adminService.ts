@@ -27,3 +27,16 @@ export const listarAuditoria = ({ busca, ...filtros }: Filtro, signal?: AbortSig
       signal,
     })
     .then((r) => r.data)
+
+export interface CriarPessoaPayload {
+  nome: string
+  email: string
+  area?: string
+  senha: string
+  papel_sistema?: "Admin" | "Usuario"
+}
+
+export async function criarPessoa(payload: CriarPessoaPayload): Promise<Pessoa> {
+  const { data } = await api.post<Pessoa>(endpoints.pessoas, payload)
+  return data
+}
