@@ -5,6 +5,11 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
+  --color-tone-critical: var(--tone-critical);
+  --color-tone-warning: var(--tone-warning);
+  --color-tone-info: var(--tone-info);
+  --color-tone-positive: var(--tone-positive);
+  --color-tone-neutral: var(--tone-neutral);
   --color-tertiary-pressed: var(--tertiary-pressed);
   --color-tertiary-foreground: var(--tertiary-foreground);
   --color-container-neutral-raised: var(--container-neutral-raised);
@@ -53,6 +58,11 @@
 }
 
 :root {
+  --tone-critical: #FF2E3B;
+  --tone-warning: #FFB31A;
+  --tone-info: #3AA7FF;
+  --tone-positive: #14AA03;
+  --tone-neutral: #94a3b8;
   --tertiary-pressed: #DDE9FF;
   --tertiary-foreground: #3640F5;
   --input-border: #D4D4D8;    
