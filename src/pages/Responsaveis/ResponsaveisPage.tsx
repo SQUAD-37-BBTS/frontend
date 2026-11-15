@@ -1,11 +1,13 @@
-import { DataTable, type Column } from "@/components/common/DataTable"
-import { ErroBanner } from "@/components/common/ErroBanner"
-import { PageHeader } from "@/components/common/PageHeader"
-import { Paginacao } from "@/components/common/Paginacao"
-import { Badge } from "@/components/ui/badge"
-import { useListaPaginada } from "@/hooks/use-lista-paginada"
-import { listarPessoas } from "@/services/adminService"
-import type { Pessoa } from "@/types"
+import { DataTable, type Column } from "@/components/common/DataTable";
+import { ErroBanner } from "@/components/common/ErroBanner";
+import { PageHeader } from "@/components/common/PageHeader";
+import { Paginacao } from "@/components/common/Paginacao";
+import { NovoResponsavelDialog } from "@/pages/Responsaveis/NovoResponsavelDialog";
+import { Badge } from "@/components/ui/badge";
+import { useAuth } from "@/contexts/AuthContext";
+import { useListaPaginada } from "@/hooks/use-lista-paginada";
+import { listarPessoas } from "@/services/adminService";
+import type { Pessoa } from "@/types";
 
 const columns: Column<Pessoa>[] = [
   {
@@ -19,7 +21,9 @@ const columns: Column<Pessoa>[] = [
     id: "perfil",
     header: "Perfil no sistema",
     cell: (pessoa) => (
-      <Badge variant={pessoa.papel_sistema === "Admin" ? "default" : "secondary"}>
+      <Badge
+        variant={pessoa.papel_sistema === "Admin" ? "default" : "secondary"}
+      >
         {pessoa.papel_sistema}
       </Badge>
     ),
@@ -30,19 +34,24 @@ const columns: Column<Pessoa>[] = [
     cell: (pessoa) =>
       pessoa.ativo ? "Ativa" : <Badge variant="outline">Desativada</Badge>,
   },
-]
+];
 
 export default function ResponsaveisPage() {
-  const lista = useListaPaginada<Pessoa>(listarPessoas, "carregar as pessoas")
+  const { usuario } = useAuth()
+  const isAdmin = usuario?.papel_sistema === "Admin" 
+  const lista = useListaPaginada<Pessoa>(listarPessoas, "carregar as pessoas");
 
   return (
     <>
-      <PageHeader
-        title="Responsáveis"
-        description="Pessoas que podem assumir papéis (Owner, Steward, Responsável Técnico, Consumidor) nos ativos."
-      />
+        <PageHeader
+          title="Responsáveis"
+          description="Pessoas que podem assumir papéis (Owner, Steward, Responsável Técnico, Consumidor) nos ativos."
+          actions={isAdmin && <NovoResponsavelDialog onCreated={lista.recarregar} />}
+        />
 
-      {lista.erro && <ErroBanner mensagem={lista.erro} onRetry={lista.recarregar} />}
+      {lista.erro && (
+        <ErroBanner mensagem={lista.erro} onRetry={lista.recarregar} />
+      )}
 
       <DataTable
         data={lista.resultado?.dados ?? []}
@@ -76,5 +85,5 @@ export default function ResponsaveisPage() {
         onChange={lista.setPagina}
       />
     </>
-  )
+  );
 }
