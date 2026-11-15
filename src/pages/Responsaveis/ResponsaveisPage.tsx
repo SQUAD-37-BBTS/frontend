@@ -22,7 +22,7 @@ const columns: Column<Pessoa>[] = [
     header: "Perfil no sistema",
     cell: (pessoa) => (
       <Badge
-        variant={pessoa.papel_sistema === "Admin" ? "default" : "secondary"}
+        variant={pessoa.papel_sistema === "Admin" ? "info" : "neutral"}
       >
         {pessoa.papel_sistema}
       </Badge>

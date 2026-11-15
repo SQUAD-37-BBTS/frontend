@@ -64,8 +64,13 @@ export const listarPessoasAtivas = () =>
     .get<Pagina<PessoaResumo>>(endpoints.pessoas, { params: { limite: 100, ativo: true } })
     .then((r) => r.data.dados)
 
-export const obterResumo = (signal?: AbortSignal) =>
-  api.get<ResumoDashboard>(endpoints.dashboard, { signal }).then((r) => r.data)
+export const obterResumo = (dominioId?: string, signal?: AbortSignal) =>
+  api
+    .get<ResumoDashboard>(endpoints.dashboard, {
+      params: dominioId ? { dominio_id: dominioId } : undefined,
+      signal,
+    })
+    .then((r) => r.data)
 
 // ---------- Detalhe do ativo
 
